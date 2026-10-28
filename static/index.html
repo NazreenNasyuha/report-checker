@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TemplateAudit AI — Master .MD Standard Builder & Read-Only PDF Auditor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 h-screen overflow-hidden flex flex-col select-none">
+
+  <!-- ======================== TOP NAVIGATION BAR ======================== -->
+  <header class="h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur px-6 flex items-center justify-between shrink-0 z-30">
+    <!-- Brand -->
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-base tracking-tight text-white">TemplateAudit AI</h1>
+          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+            YAML Contract · SymPy · Table-Cell Pinning
+          </span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Turn a Reference PDF into an AI-editable <code class="text-cyan-300">.md</code> Standard &amp; audit Target PDFs with non-destructive bounding boxes
+        </p>
+      </div>
+    </div>
+
+    <!-- MAIN FEATURE MODE SWITCHER (2 CORE FEATURES) -->
+    <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+      <button
+        id="nav-tab-builder"
+        onclick="switchMainMode('builder')"
+        class="mode-tab-btn active px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition"
+      >
+        <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-mono text-[11px]">1</span>
+        Master <code class="font-mono">.MD</code> Base Builder
+      </button>
+      <button
+        id="nav-tab-auditor"
+        onclick="switchMainMode('auditor')"
+        class="mode-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-2 transition"
+      >
+        <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono text-[11px]">2</span>
+        Audit Target PDF Against Master <code class="font-mono">.MD</code>
+      </button>
+    </div>
+
+    <!-- Local Ollama Model & Status -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5">
+        <span id="ollama-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="ollama-status-text" class="text-xs text-slate-300 font-medium">Checking Ollama...</span>
+      </div>
+      <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1">
+        <span class="text-[11px] text-slate-400 font-mono">Model:</span>
+        <input
+          id="ollama-model-input"
+          type="text"
+          value="qwen2.5:7b-instruct"
+          class="bg-transparent text-xs font-mono text-cyan-300 focus:outline-none w-36"
+          title="Local Ollama model name"
+        />
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- FEATURE 1 VIEW: MASTER .MD BASE BUILDER                                 -->
+  <!-- ======================================================================= -->
+  <section id="view-builder" class="flex-1 flex overflow-hidden">
+    <!-- Left Column: Step 1 Upload Perfect PDF + Saved Templates Library (34%) -->
+    <div class="w-[34%] border-r border-slate-800 bg-slate-900/50 flex flex-col overflow-y-auto p-5 space-y-5">
+
+      <!-- Card 1: Upload Perfect / Reference PDF -->
+      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-3 shadow-lg">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-indigo-400 font-semibold">
+            Step 1 · Extract Reference PDF to .MD
+          </span>
+          <span class="text-[11px] text-slate-400 font-mono">pymupdf4llm + YAML</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Upload a <strong>Perfect / Reference PDF Report</strong>. We extract its headings, sections, formulas, and tables into a structured <code class="text-cyan-300">.md</code> standard with a YAML machine contract.
+        </p>
+
+        <div class="flex items-center gap-2 pt-1">
+          <label
+            id="perfect-dropzone"
+            for="perfect-pdf-input"
+            class="flex-1 cursor-pointer rounded-lg border border-dashed border-indigo-500/50 bg-indigo-950/20 hover:bg-indigo-950/40 px-3 py-3 text-center transition"
+          >
+            <div class="text-xs font-semibold text-indigo-200">Upload Perfect / Reference PDF</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Click or drop <code class="font-mono">.pdf</code> file</div>
+            <input id="perfect-pdf-input" type="file" accept=".pdf,application/pdf" class="hidden" />
+          </label>
+
+          <button
+            id="btn-load-sample-perfect"
+            type="button"
+            class="px-3 py-3 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition shrink-0"
+            title="Extract the built-in Perfect Reference Turbine Report PDF into the Markdown Editor"
+          >
+            ⚡ Load Sample<br/>Perfect PDF
+          </button>
+        </div>
+
+        <div id="extract-pdf-status" class="hidden text-xs text-cyan-300 bg-cyan-950/40 border border-cyan-500/30 rounded-lg px-3 py-2 font-mono"></div>
+      </div>
+
+      <!-- Card 2: AI-Assisted .MD Rule Injector (Local Ollama + GitHub Diff) -->
+      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-3 shadow-lg">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-semibold">
+            Step 2 · AI-Assisted .MD Rule Editing
+          </span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono">Ollama + Inline Diff</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Describe rules, required citations, or formulas to inject into the active <code class="text-cyan-300">.md</code> standard. Every AI edit generates a Red/Green inline diff and syncs the YAML frontmatter.
+        </p>
+
+        <!-- Quick Preset Prompts -->
+        <div class="space-y-1.5">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Quick Rule Presets (Click to Fill):</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onclick="setAiPromptPreset('Add a checklist rule under Section 2 that Reference Report TR-2025-88B and ISO-10816-3 must be cited, and note that Total Load = Dead Load + Live Load')"
+              class="text-[11px] px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-left"
+            >
+              + Require TR-2025-88B &amp; Total Load = Dead + Live Load
+            </button>
+            <button
+              type="button"
+              onclick="setAiPromptPreset('Enforce that Appendix B — Ultrasonic Bolt Inspection Log is mandatory and that Net Combined Output = Gross Power - Auxiliary Load')"
+              class="text-[11px] px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-left"
+            >
+              + Enforce Appendix B &amp; Net Output Formula
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          id="ai-assist-input"
+          rows="3"
+          placeholder="e.g., Add a checklist rule under Section 2 that Reference Report X must be cited, and note that Total Load = Dead Load + Live Load..."
+          class="w-full rounded-lg bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:outline-none p-2.5 text-xs text-slate-100 select-text"
+        ></textarea>
+
+        <button
+          id="btn-run-ai-assist"
+          type="button"
+          class="w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md transition flex items-center justify-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Apply with Ollama AI</span>
+        </button>
+
+        <div id="ai-assist-status" class="hidden text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-500/30 rounded-lg px-3 py-2"></div>
+      </div>
+
+      <!-- Card 3: Saved Master .MD Templates Library (./templates/) -->
+      <div class="rounded-xl bg-slate-900 border border-slate-800 p-4 space-y-3 shadow-lg flex-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+            Saved Master .MD Bases (./templates/)
+          </span>
+          <span id="saved-templates-count" class="text-xs font-mono text-slate-400">0</span>
+        </div>
+        <div id="saved-templates-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Master .MD Split Editor + Diff Review Drawer + Save Bar (66%) -->
+    <div class="w-[66%] bg-slate-950 flex flex-col overflow-hidden">
+      <!-- Editor Top Toolbar -->
+      <div class="h-14 border-b border-slate-800 bg-slate-900/70 px-5 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-slate-300">Master <code class="text-cyan-300">.MD</code> Standard</span>
+          <span id="editor-source-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+            Turbine_Thermal_Standard_v1.md
+          </span>
+
+          <!-- 3-Way View Switcher: Raw | Split | Preview -->
+          <div class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 ml-2">
+            <button
+              type="button"
+              data-mode="raw"
+              onclick="setEditorViewMode('raw')"
+              class="editor-mode-btn px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white transition"
+            >
+              Raw .MD
+            </button>
+            <button
+              type="button"
+              data-mode="split"
+              onclick="setEditorViewMode('split')"
+              class="editor-mode-btn px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white transition"
+            >
+              Split View
+            </button>
+            <button
+              type="button"
+              data-mode="preview"
+              onclick="setEditorViewMode('preview')"
+              class="editor-mode-btn px-2.5 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white transition"
+            >
+              Preview
+            </button>
+          </div>
+        </div>
+
+        <!-- Template Filename Input + Undo + Save + Download -->
+        <div class="flex items-center gap-2">
+          <button
+            id="btn-undo-md-edit"
+            type="button"
+            disabled
+            class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-amber-300 text-xs font-medium border border-slate-700 transition"
+            title="Undo last Markdown edit or AI rule injection"
+          >
+            ↩ Undo
+          </button>
+
+          <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1">
+            <span class="text-[11px] font-mono text-slate-500">./templates/</span>
+            <input
+              id="template-save-name"
+              type="text"
+              value="Turbine_Thermal_Standard_v1"
+              placeholder="Standard_Name"
+              class="bg-transparent text-xs font-mono text-white focus:outline-none w-44 select-text"
+            />
+            <span class="text-[11px] font-mono text-slate-500">.md</span>
+          </div>
+
+          <button
+            id="btn-save-template"
+            type="button"
+            class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Save Master .MD
+          </button>
+
+          <button
+            id="btn-download-builder-md"
+            type="button"
+            class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition"
+          >
+            Download
+          </button>
+        </div>
+      </div>
+
+      <!-- Save Notification Banner -->
+      <div id="save-template-feedback" class="hidden bg-emerald-950/70 border-b border-emerald-500/40 px-5 py-2 text-xs text-emerald-200 flex items-center justify-between"></div>
+
+      <!-- Collapsible GitHub-Style AI Rule Diff Drawer -->
+      <div id="ai-diff-drawer" class="hidden border-b border-indigo-500/40 bg-slate-900/95 max-h-52 flex flex-col shrink-0">
+        <div class="px-4 py-2 border-b border-slate-800 flex items-center justify-between text-xs">
+          <div id="ai-diff-summary" class="truncate"></div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onclick="closeAiDiffDrawer()"
+              class="px-2.5 py-1 rounded bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-200 border border-emerald-500/40 text-[11px] font-semibold"
+            >
+              ✓ Accept Diff
+            </button>
+            <button
+              type="button"
+              onclick="undoEditorChange()"
+              class="px-2.5 py-1 rounded bg-red-600/20 hover:bg-red-600/35 text-red-200 border border-red-500/40 text-[11px] font-semibold"
+            >
+              ↩ Revert Edit
+            </button>
+          </div>
+        </div>
+        <div id="ai-diff-lines" class="overflow-y-auto py-1 select-text"></div>
+      </div>
+
+      <!-- Main Editable Textarea & Rendered Preview Split/Toggle -->
+      <div class="flex-1 flex overflow-hidden relative">
+        <textarea
+          id="md-editor-textarea"
+          spellcheck="false"
+          class="w-1/2 h-full border-r border-slate-800 bg-slate-950 text-slate-100 font-mono text-xs leading-relaxed p-5 focus:outline-none resize-none overflow-y-auto select-text"
+          placeholder="# Upload a Perfect PDF or click 'Load Sample Perfect PDF' to generate your Master .MD Standard..."
+        ></textarea>
+
+        <div
+          id="md-rendered-preview"
+          class="w-1/2 h-full bg-slate-950 p-5 overflow-y-auto select-text md-preview space-y-2"
+        ></div>
+      </div>
+
+      <!-- Footer Helper Bar -->
+      <div class="h-9 border-t border-slate-800 bg-slate-900/80 px-5 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Tip: YAML Frontmatter (<code class="text-indigo-300">---</code>), <code class="text-cyan-300">## Sections</code>, and formulas in this Master <code class="text-cyan-300">.md</code> are enforced automatically.</span>
+        <span id="md-char-stats" class="font-mono">0 lines · 0 chars</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= -->
+  <!-- FEATURE 2 VIEW: AUDIT TARGET PDF AGAINST MASTER .MD BASE                -->
+  <!-- ======================================================================= -->
+  <section id="view-auditor" class="hidden flex-1 flex flex-col overflow-hidden">
+
+    <!-- Auditor Top Control Bar -->
+    <div class="h-14 border-b border-slate-800 bg-slate-900/80 px-6 flex items-center justify-between gap-4 shrink-0">
+      <!-- Left: Select Master .MD Base + Upload Target PDF -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5">
+          <span class="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">Master .MD Base:</span>
+          <select
+            id="audit-template-select"
+            class="bg-slate-950 text-xs font-mono text-white focus:outline-none pr-2"
+          ></select>
+        </div>
+
+        <label
+          for="target-pdf-input"
+          class="cursor-pointer px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V3m0 0L8 7m4-4l4 4" />
+          </svg>
+          <span id="target-pdf-label">Upload Target PDF Report</span>
+          <input id="target-pdf-input" type="file" accept=".pdf,application/pdf" class="hidden" />
+        </label>
+
+        <button
+          id="btn-run-audit"
+          type="button"
+          disabled
+          class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:pointer-events-none text-white text-xs font-semibold transition"
+        >
+          Audit Uploaded PDF
+        </button>
+
+        <button
+          id="btn-run-sample-audit"
+          type="button"
+          class="px-3.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition"
+          title="Run instant streaming audit on Target_Turbine_Report_With_Errors_2026.pdf against the selected Master .MD Base"
+        >
+          ⚡ Load &amp; Audit Sample Error PDF
+        </button>
+      </div>
+
+      <!-- Right: Visual Legend + Export Review Copy -->
+      <div class="flex items-center gap-3">
+        <div class="hidden xl:flex items-center gap-3 text-[11px] bg-slate-950/90 border border-slate-800 px-3 py-1 rounded-lg">
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block"></span>
+            <span class="text-slate-300">Calculation (<code class="text-red-400">#ef4444</code>)</span>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block"></span>
+            <span class="text-slate-300">Ref / Structure (<code class="text-amber-400">#f59e0b</code>)</span>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span>
+            <span class="text-slate-300">Typo / Unit (<code class="text-cyan-300">#06b6d4</code>)</span>
+          </span>
+        </div>
+
+        <button
+          id="btn-export-annotated-pdf"
+          type="button"
+          class="hidden px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium transition items-center gap-1.5"
+          title="Export a separate _review_copy.pdf with native PDF annotations for non-ignored issues"
+        >
+          <span>Export Annotated Copy</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Real-Time SSE Streaming Audit Progress Banner -->
+    <div id="audit-stream-banner" class="hidden bg-slate-900 border-b border-indigo-500/40 px-6 py-2 shrink-0">
+      <div class="flex items-center justify-between text-xs mb-1">
+        <span id="audit-stream-text" class="font-mono text-cyan-300">Streaming audit progress...</span>
+        <span class="text-[10px] font-mono text-slate-400">SSE Real-Time Pipeline</span>
+      </div>
+      <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="audit-stream-bar" class="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 transition-all duration-300" style="width: 15%"></div>
+      </div>
+    </div>
+
+    <!-- Master .MD Rule & Cross-Page Symbol Comparison Drawer (Toggled via Spacebar or Card Button) -->
+    <div id="master-compare-drawer" class="hidden bg-slate-900/95 border-b border-indigo-500/40 px-6 py-3 shrink-0">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-white">Master <code class="text-cyan-300">.MD</code> Rule vs. Target PDF Comparison</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Shortcut: Spacebar</span>
+        </div>
+        <button
+          type="button"
+          onclick="toggleMasterCompareDrawer()"
+          class="text-xs text-slate-400 hover:text-white font-mono"
+        >
+          ✕ Close
+        </button>
+      </div>
+      <div id="master-compare-body"></div>
+    </div>
+
+    <!-- Split Screen Body: Left PDF Viewer with Thumbnail Rail (56%) + Right Dual-Reasoning Inspector (44%) -->
+    <div class="flex-1 flex overflow-hidden">
+
+      <!-- LEFT PANEL: NON-DESTRUCTIVE TARGET PDF VIEWER WITH THUMBNAIL RAIL & BOUNDING BOXES -->
+      <div class="w-[56%] border-r border-slate-800 bg-slate-900/40 flex flex-col overflow-hidden">
+        <!-- Viewer Sub-Toolbar -->
+        <div class="h-10 border-b border-slate-800/80 bg-slate-900/80 px-4 flex items-center justify-between text-xs shrink-0">
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+              <input id="toggle-pdf-overlays" type="checkbox" checked class="accent-indigo-500 rounded" />
+              <span>Show Boxes &amp; Hover Popovers</span>
+            </label>
+            <span id="readonly-hash-badge" class="hidden text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+              READ-ONLY VERIFIED
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Keyboard Triage Quick Buttons -->
+            <div class="flex items-center gap-1 mr-2 text-[10px] font-mono text-slate-400">
+              <button onclick="stepIssueSelection(-1)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" title="Previous Issue (K / ↑)">↑ K</button>
+              <button onclick="stepIssueSelection(1)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200" title="Next Issue (J / ↓)">↓ J</button>
+              <button onclick="toggleMasterCompareDrawer()" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300" title="Toggle Master .MD Rule Comparison (Space)">Space: Diff</button>
+            </div>
+
+            <button onclick="adjustPdfZoom(-10)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono">−</button>
+            <span id="pdf-zoom-label" class="font-mono text-[11px] text-slate-300 w-12 text-center">92%</span>
+            <button onclick="adjustPdfZoom(10)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono">+</button>
+            <button onclick="setPdfZoom(92)" class="ml-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-400">Fit</button>
+          </div>
+        </div>
+
+        <!-- Thumbnail Heatmap Rail + Scrollable PDF Canvas Container -->
+        <div class="flex-1 flex overflow-hidden">
+          <!-- Page Thumbnail & Issue Heatmap Rail -->
+          <div
+            id="pdf-thumbnail-rail"
+            class="hidden w-20 border-r border-slate-800/80 bg-slate-950/70 overflow-y-auto p-2 space-y-2.5 shrink-0"
+          ></div>
+
+          <!-- Main Scrollable PDF Pages Stack -->
+          <div id="pdf-viewer-scroll" class="flex-1 overflow-y-auto p-6 flex flex-col items-center gap-8">
+            <!-- Empty State -->
+            <div id="pdf-empty-state" class="my-auto max-w-md text-center space-y-4 p-8 rounded-2xl border border-slate-800/90 bg-slate-900/50">
+              <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto text-indigo-400">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h2 class="text-base font-bold text-white">Audit Target PDF Against Master <code class="text-cyan-300">.MD</code> Base</h2>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Select a saved Master <code class="text-cyan-300">.md</code> Standard from the dropdown above, then upload a Target PDF or click <strong>"⚡ Load &amp; Audit Sample Error PDF"</strong>.
+              </p>
+              <div class="pt-1">
+                <button
+                  type="button"
+                  onclick="document.getElementById('btn-run-sample-audit').click()"
+                  class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition"
+                >
+                  ⚡ Run Instant Sample Audit
+                </button>
+              </div>
+            </div>
+
+            <!-- Rendered Pages Container -->
+            <div id="pdf-pages-stack" class="hidden w-full flex flex-col items-center gap-8"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: DUAL-REASONING AUDIT INSPECTOR + IGNORE/DISMISS WORKFLOW -->
+      <div class="w-[44%] bg-slate-950 flex flex-col overflow-hidden">
+
+        <!-- Summary Metrics Bar -->
+        <div class="grid grid-cols-5 gap-2 p-3 border-b border-slate-800 bg-slate-900/50 shrink-0">
+          <div class="rounded-lg bg-slate-900/90 border border-slate-800 p-2 text-center">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Active</div>
+            <div id="stat-active-total" class="text-base font-bold text-white">0</div>
+          </div>
+          <div class="rounded-lg bg-red-950/25 border border-red-500/30 p-2 text-center">
+            <div class="text-[10px] font-mono uppercase text-red-300">Math/Calc</div>
+            <div id="stat-calc-count" class="text-base font-bold text-red-400">0</div>
+          </div>
+          <div class="rounded-lg bg-amber-950/25 border border-amber-500/30 p-2 text-center">
+            <div class="text-[10px] font-mono uppercase text-amber-300">Ref/Struct</div>
+            <div id="stat-ref-count" class="text-base font-bold text-amber-400">0</div>
+          </div>
+          <div class="rounded-lg bg-cyan-950/25 border border-cyan-500/30 p-2 text-center">
+            <div class="text-[10px] font-mono uppercase text-cyan-300">Typo/Unit</div>
+            <div id="stat-typo-count" class="text-base font-bold text-cyan-400">0</div>
+          </div>
+          <div class="rounded-lg bg-slate-900/90 border border-slate-700 p-2 text-center">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Ignored</div>
+            <div id="stat-ignored-count" class="text-base font-bold text-slate-400">0</div>
+          </div>
+        </div>
+
+        <!-- Active vs Ignored Toggle + Category Filter Bar -->
+        <div class="px-4 py-2.5 border-b border-slate-800 bg-slate-900/70 flex items-center justify-between gap-2 shrink-0">
+          <!-- Active vs Ignored List Switch -->
+          <div class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+            <button
+              id="btn-show-active-issues"
+              onclick="setIssueListMode('active')"
+              class="px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white transition"
+            >
+              Active Issues (0)
+            </button>
+            <button
+              id="btn-show-ignored-issues"
+              onclick="setIssueListMode('ignored')"
+              class="px-2.5 py-1 rounded text-[11px] font-semibold text-slate-400 hover:text-white transition"
+            >
+              Ignored / Dismissed (0)
+            </button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="flex items-center gap-1 text-[11px]">
+            <button onclick="setCategoryFilter('all')" data-filter="all" class="cat-filter-btn px-2 py-0.5 rounded bg-slate-800 text-white font-semibold">All</button>
+            <button onclick="setCategoryFilter('calculation')" data-filter="calculation" class="cat-filter-btn px-2 py-0.5 rounded text-slate-400 hover:text-white">Math</button>
+            <button onclick="setCategoryFilter('ref_struct')" data-filter="ref_struct" class="cat-filter-btn px-2 py-0.5 rounded text-slate-400 hover:text-white">Ref/Struct</button>
+            <button onclick="setCategoryFilter('typo')" data-filter="typo" class="cat-filter-btn px-2 py-0.5 rounded text-slate-400 hover:text-white">Typo</button>
+          </div>
+        </div>
+
+        <!-- Issue Cards Scroll List -->
+        <div id="audit-issues-container" class="flex-1 overflow-y-auto p-4 space-y-3 select-text">
+          <div class="h-full flex flex-col items-center justify-center text-center text-slate-500 p-6">
+            <p class="text-xs">No audit results yet. Run an audit to inspect deviations with Dual Reasoning, Table-Cell Pinning, and Hover Popovers.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Modular Frontend Scripts -->
+  <script src="/static/js/state.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/markdown.js"></script>
+  <script src="/static/js/builder.js"></script>
+  <script src="/static/js/auditor.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

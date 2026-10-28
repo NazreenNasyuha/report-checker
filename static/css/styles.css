@@ -1,0 +1,183 @@
+/* TemplateAudit AI — Custom Styles, Bounding Box Overlays, Hover Popovers & Diff Viewer */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* PDF Page Canvas Wrapper */
+.pdf-page-frame {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 22px 45px -15px rgba(0, 0, 0, 0.85);
+  border-radius: 6px;
+  overflow: visible;
+  background: #ffffff;
+  transition: width 0.16s ease;
+}
+
+.bbox-overlay-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.pdf-issue-bbox {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pdf-issue-bbox:hover {
+  transform: scale(1.015);
+  z-index: 45;
+}
+
+.pdf-issue-bbox.selected {
+  z-index: 40;
+  animation: pulse-ring 1.6s infinite;
+}
+
+.bbox-tag-pill {
+  position: absolute;
+  top: -19px;
+  left: -2px;
+  font-size: 9.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #020617;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.bbox-underline-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.bbox-underline-bar.dashed {
+  background: transparent !important;
+  border-bottom: 2.5px dashed currentColor;
+  height: 0;
+}
+
+/* Glassmorphic Floating Hover Popover on PDF Bounding Box */
+.bbox-hover-popover {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  width: 310px;
+  background: rgba(9, 13, 22, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f1f5f9;
+  box-shadow: 0 20px 38px -10px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.pdf-issue-bbox:hover .bbox-hover-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.mode-tab-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(6, 182, 212, 0.16));
+  border-color: rgba(99, 102, 241, 0.65);
+  color: #ffffff;
+}
+
+.issue-card {
+  transition: all 0.15s ease;
+}
+.issue-card.active-card {
+  border-color: #6366f1 !important;
+  background: rgba(30, 41, 59, 0.95) !important;
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.45), 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Thumbnail Rail Item */
+.page-thumb-card {
+  transition: all 0.15s ease;
+}
+.page-thumb-card:hover,
+.page-thumb-card.active {
+  border-color: #6366f1;
+  background: rgba(30, 41, 59, 0.9);
+}
+
+/* Markdown Preview Table Styling */
+.md-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 12px;
+}
+.md-preview th,
+.md-preview td {
+  border: 1px solid #334155;
+  padding: 6px 10px;
+  text-align: left;
+}
+.md-preview th {
+  background: #1e293b;
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+/* GitHub-style Diff Lines */
+.diff-line-added {
+  background: rgba(16, 185, 129, 0.16);
+  border-left: 3px solid #10b981;
+  color: #a7f3d0;
+}
+.diff-line-removed {
+  background: rgba(239, 68, 68, 0.16);
+  border-left: 3px solid #ef4444;
+  color: #fecaca;
+  text-decoration: line-through;
+}
+.diff-line-unchanged {
+  color: #64748b;
+}
