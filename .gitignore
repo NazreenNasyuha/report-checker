@@ -18,3 +18,9 @@ storage/
 .DS_Store
 Thumbs.db
 *.log
+
+# Local-only living & agent documentation (never release/commit)
+ARCHITECTURE.md
+AGENTS.md
+architecture.md
+agents.md
